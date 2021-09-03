@@ -4,6 +4,9 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    twilioSID: '%env(resolve:TWILIO_ACCOUNT_SID)%'
+    twilioToken: '%env(resolve:TWILIO_AUTH_TOKEN)%'
+    twilioVerificationSID: '%env(resolve:TWILIO_VERIFICATION_SID)%'
 
 services:
     # default configuration for services in *this* file
@@ -23,3 +26,8 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\Security\OTPService:
+        arguments:
+            $twilioSID : '%twilioSID%'
+            $twilioToken : '%twilioToken%'
+            $twilioVerificationSID : '%twilioVerificationSID%'

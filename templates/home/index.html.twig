@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="css/home.css">
+{% endblock %}
+
+{% block body %}
+    <div class="main-wrapper">
+        <div class="content">
+            <h1>Hello {{ username }}! ✅</h1>
+            <div class="btn-group">
+                <button
+                        onclick="showOTPForm()"
+                        class="btn btn-outline-primary"
+                >
+                    Generate OTP
+                </button>
+                <a
+                        href="{{ path('app_logout') }}"
+                        class="btn btn-outline-danger"
+                >
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const generateOTP = () => {
+            fetch("{{ path('generateOTP') }}", {
+                method: 'GET'
+            })
+        };
+
+        const showOTPForm = () => {
+            generateOTP();
+            Swal.fire({
+                title: 'Enter your OTP',
+                input: 'text',
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Verify',
+                showLoaderOnConfirm: true,
+                preConfirm: (otp) => {
+                    return fetch("{{ path('verifyOTP') }}", {
+                        method: 'POST',
+                        body: JSON.stringify({otp})
+                    })
+                        .then(response => {
+                            return new Promise(resolve => response.json()
+                                .then(json => resolve({
+                                    status: response.status,
+                                    ok: response.ok,
+                                    json
+                                }))
+                            )
+                        })
+                        .then(({ok, json}) => {
+                            if (ok) {
+                                Swal.fire({
+                                    title: json.message,
+                                });
+                            } else {
+                                Swal.showValidationMessage(json.error);
+                            }
+                        });
+                },
+                backdrop: true,
+                allowOutsideClick: () => !Swal.isLoading()
+            });
+        }
+    </script>
+{% endblock %}
